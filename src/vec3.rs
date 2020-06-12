@@ -200,3 +200,30 @@ impl<'a> Div<f32> for &'a Vec3 {
         result
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn cross_product1() {
+        let a = Vec3::new(1.0, 0.0, 0.0);
+        let b = Vec3::new(0.0, 1.0, 0.0);
+
+        let c = a.cross(&b);
+        assert_eq!(0.0, c.x());
+        assert_eq!(0.0, c.y());
+        assert_eq!(1.0, c.z());
+    }
+
+    #[test]
+    fn cross_product2() {
+        let a = Vec3::new(2.0, 3.0, 4.0);
+        let b = Vec3::new(5.0, 6.0, 7.0);
+
+        let c = a.cross(&b);
+        assert_eq!(-3.0, c.x());
+        assert_eq!(6.0, c.y());
+        assert_eq!(-3.0, c.z());
+    }
+}
