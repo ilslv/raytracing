@@ -1,4 +1,4 @@
-use crate::vec3::*;
+use crate::vec3::Vec3;
 use std::fmt::{Display, Formatter};
 use std::fmt;
 

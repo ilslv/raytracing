@@ -1,5 +1,6 @@
 use std::ops::{Neg, Index, IndexMut, AddAssign, MulAssign, DivAssign, Mul, Add, SubAssign, Sub, Div};
 use std::slice::{Iter, IterMut};
+use crate::point3::Point3;
 
 #[derive(Clone, Copy, Debug, Default)]
 pub(crate) struct Vec3 {
@@ -141,6 +142,14 @@ impl<'a, 'b> Add<&'b Vec3> for &'a Vec3 {
     }
 }
 
+impl<'a, 'b> Add<&'b Point3> for &'a Vec3 {
+    type Output = Point3;
+
+    fn add(self, rhs: &'b Point3) -> Self::Output {
+        Point3(self + &rhs.0)
+    }
+}
+
 impl<'a, 'b> Sub<&'b Vec3> for &'a Vec3 {
     type Output = Vec3;
 
@@ -150,6 +159,14 @@ impl<'a, 'b> Sub<&'b Vec3> for &'a Vec3 {
             *r = *a - *b;
         }
         result
+    }
+}
+
+impl<'a, 'b> Sub<&'b Point3> for &'a Vec3 {
+    type Output = Point3;
+
+    fn sub(self, rhs: &'b Point3) -> Self::Output {
+        Point3(self - &rhs.0)
     }
 }
 
@@ -198,6 +215,12 @@ impl<'a> Div<f32> for &'a Vec3 {
             *r = *a / rhs;
         }
         result
+    }
+}
+
+impl Into<Point3> for Vec3 {
+    fn into(self) -> Point3 {
+        Point3(self)
     }
 }
 
