@@ -57,7 +57,7 @@ impl Vec3 {
         }
     }
 
-    pub fn unit_vec(&self) -> Vec3 {
+    pub fn unit_vec(self) -> Vec3 {
         self / self.length()
     }
 }
@@ -102,17 +102,17 @@ impl<'a> IntoIterator for &'a mut Vec3 {
     }
 }
 
-impl<'a> AddAssign<&'a Vec3> for Vec3 {
-    fn add_assign(&mut self, rhs: &'a Vec3) {
-        for (a, b) in self.iter_mut().zip(rhs) {
+impl AddAssign<Vec3> for Vec3 {
+    fn add_assign(&mut self, rhs: Vec3) {
+        for (a, b) in self.iter_mut().zip(&rhs) {
             *a += *b;
         }
     }
 }
 
-impl<'a> SubAssign<&'a Vec3> for Vec3 {
-    fn sub_assign(&mut self, rhs: &'a Vec3) {
-        for (a, b) in self.iter_mut().zip(rhs) {
+impl SubAssign<Vec3> for Vec3 {
+    fn sub_assign(&mut self, rhs: Vec3) {
+        for (a, b) in self.iter_mut().zip(&rhs) {
             *a -= *b;
         }
     }
@@ -130,88 +130,88 @@ impl DivAssign<f32> for Vec3 {
     }
 }
 
-impl<'a, 'b> Add<&'b Vec3> for &'a Vec3 {
+impl Add<Vec3> for Vec3 {
     type Output = Vec3;
 
-    fn add(self, rhs: &'b Vec3) -> Self::Output {
+    fn add(self, rhs: Vec3) -> Self::Output {
         let mut result = Vec3::default();
-        for ((r, a), b) in result.iter_mut().zip(self).zip(rhs) {
+        for ((r, a), b) in result.iter_mut().zip(&self).zip(&rhs) {
             *r = *a + *b;
         }
         result
     }
 }
 
-impl<'a, 'b> Add<&'b Point3> for &'a Vec3 {
+impl Add<Point3> for Vec3 {
     type Output = Point3;
 
-    fn add(self, rhs: &'b Point3) -> Self::Output {
-        Point3(self + &rhs.0)
+    fn add(self, rhs: Point3) -> Self::Output {
+        Point3(self + rhs.0)
     }
 }
 
-impl<'a, 'b> Sub<&'b Vec3> for &'a Vec3 {
+impl Sub<Vec3> for Vec3 {
     type Output = Vec3;
 
-    fn sub(self, rhs: &'b Vec3) -> Self::Output {
+    fn sub(self, rhs: Vec3) -> Self::Output {
         let mut result = Vec3::default();
-        for ((r, a), b) in result.iter_mut().zip(self).zip(rhs) {
+        for ((r, a), b) in result.iter_mut().zip(&self).zip(&rhs) {
             *r = *a - *b;
         }
         result
     }
 }
 
-impl<'a, 'b> Sub<&'b Point3> for &'a Vec3 {
+impl Sub<Point3> for Vec3 {
     type Output = Point3;
 
-    fn sub(self, rhs: &'b Point3) -> Self::Output {
-        Point3(self - &rhs.0)
+    fn sub(self, rhs: Point3) -> Self::Output {
+        Point3(self - rhs.0)
     }
 }
 
-impl<'a, 'b> Mul<&'b Vec3> for &'a Vec3 {
+impl Mul<Vec3> for Vec3 {
     type Output = Vec3;
 
-    fn mul(self, rhs: &'b Vec3) -> Self::Output {
+    fn mul(self, rhs: Vec3) -> Self::Output {
         let mut result = Vec3::default();
-        for ((r, a), b) in result.iter_mut().zip(self).zip(rhs) {
+        for ((r, a), b) in result.iter_mut().zip(&self).zip(&rhs) {
             *r = *a * *b;
         }
         result
     }
 }
 
-impl<'a> Mul<f32> for &'a Vec3 {
+impl Mul<f32> for Vec3 {
     type Output = Vec3;
 
     fn mul(self, rhs: f32) -> Self::Output {
         let mut result = Vec3::default();
-        for (r, a) in result.iter_mut().zip(self) {
+        for (r, a) in result.iter_mut().zip(&self) {
             *r = *a * rhs;
         }
         result
     }
 }
 
-impl<'a> Mul<&'a Vec3> for f32 {
+impl Mul<Vec3> for f32 {
     type Output = Vec3;
 
-    fn mul(self, rhs: &'a Vec3) -> Self::Output {
+    fn mul(self, rhs: Vec3) -> Self::Output {
         let mut result = Vec3::default();
-        for (r, a) in result.iter_mut().zip(rhs) {
+        for (r, a) in result.iter_mut().zip(&rhs) {
             *r = *a * self;
         }
         result
     }
 }
 
-impl<'a> Div<f32> for &'a Vec3 {
+impl Div<f32> for Vec3 {
     type Output = Vec3;
 
     fn div(self, rhs: f32) -> Self::Output {
         let mut result = Vec3::default();
-        for (r, a) in result.iter_mut().zip(self) {
+        for (r, a) in result.iter_mut().zip(&self) {
             *r = *a / rhs;
         }
         result

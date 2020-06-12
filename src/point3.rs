@@ -45,30 +45,30 @@ impl IndexMut<u8> for Point3 {
     }
 }
 
-impl<'a, 'b> Add<&'b Vec3> for &'a Point3 {
+impl Add<Vec3> for Point3 {
     type Output = Point3;
 
-    fn add(self, rhs: &'b Vec3) -> Self::Output {
-        Point3(&self.0 + rhs)
+    fn add(self, rhs: Vec3) -> Self::Output {
+        Point3(self.0 + rhs)
     }
 }
 
-impl<'a, 'b> Sub<&'b Vec3> for &'a Point3 {
+impl Sub<Vec3> for Point3 {
     type Output = Point3;
 
-    fn sub(self, rhs: &'b Vec3) -> Self::Output {
-        Point3(&self.0 - rhs)
+    fn sub(self, rhs: Vec3) -> Self::Output {
+        Point3(self.0 - rhs)
     }
 }
 
-impl<'a> AddAssign<&'a Vec3> for Point3 {
-    fn add_assign(&mut self, rhs: &'a Vec3) {
+impl AddAssign<Vec3> for Point3 {
+    fn add_assign(&mut self, rhs: Vec3) {
         self.0 += rhs;
     }
 }
 
-impl<'a> SubAssign<&'a Vec3> for Point3 {
-    fn sub_assign(&mut self, rhs: &'a Vec3) {
+impl SubAssign<Vec3> for Point3 {
+    fn sub_assign(&mut self, rhs: Vec3) {
         self.0 -= rhs
     }
 }
