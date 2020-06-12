@@ -1,4 +1,7 @@
+use crate::color::Color;
+
 mod vec3;
+mod color;
 
 const IMAGE_WIDTH: u32 = 256;
 const IMAGE_HEIGHT: u32 = 256;
@@ -9,15 +12,13 @@ fn main() {
     for j in (0..IMAGE_HEIGHT).rev() {
         eprintln!("Lines remained {}", j);
         for i in 0..IMAGE_WIDTH {
-            let r = i as f32 / IMAGE_WIDTH as f32;
-            let g = j as f32 / IMAGE_HEIGHT as f32;
-            let b = 0.25;
+            let pixel = Color::new(
+                i as f32 / IMAGE_WIDTH as f32,
+                j as f32 / IMAGE_HEIGHT as f32,
+                0.25,
+            );
 
-            let ir = (255.0 * r) as i32;
-            let ig = (255.0 * g) as i32;
-            let ib = (255.0 * b) as i32;
-
-            print!("{} {} {}\n", ir, ig, ib);
+            print!("{}\n", pixel);
         }
     }
     eprintln!("Done!");

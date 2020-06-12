@@ -2,7 +2,7 @@ use std::ops::{Neg, Index, IndexMut, AddAssign, MulAssign, DivAssign, Mul, Add, 
 use std::slice::{Iter, IterMut};
 
 #[derive(Clone, Copy, Debug, Default)]
-struct Vec3 {
+pub(crate) struct Vec3 {
     vec: [f32; 3],
 }
 
