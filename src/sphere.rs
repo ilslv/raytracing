@@ -3,9 +3,15 @@ use crate::hit::{Hit, HitRecord};
 use crate::ray::Ray;
 use crate::vec3::Vec3;
 
-struct Sphere {
+pub(crate) struct Sphere {
     center: Point3,
     radius: f32,
+}
+
+impl Sphere {
+    pub fn new(center: Point3, radius: f32) -> Self {
+        Sphere { center, radius }
+    }
 }
 
 impl Hit for Sphere {
@@ -37,6 +43,7 @@ impl Hit for Sphere {
         rec.normal = (Vec3::from(rec.p) - Vec3::from(self.center)) / self.radius;
         let outward_normal = (Vec3::from(rec.p) - Vec3::from(self.center)) / self.radius;
         rec.set_face_normal(ray, &outward_normal);
-        return Some(rec);
+
+        Some(rec)
     }
 }
