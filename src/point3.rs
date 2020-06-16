@@ -73,8 +73,8 @@ impl SubAssign<Vec3> for Point3 {
     }
 }
 
-impl Into<Vec3> for Point3 {
-    fn into(self) -> Vec3 {
-        self.0
+impl From<Vec3> for Point3 {
+    fn from(v: Vec3) -> Self {
+        Point3(v)
     }
 }

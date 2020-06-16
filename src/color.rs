@@ -3,7 +3,7 @@ use std::fmt::{Display, Formatter};
 use std::fmt;
 
 #[derive(Copy, Clone, Debug, Default)]
-pub(crate) struct Color(Vec3);
+pub(crate) struct Color(pub Vec3);
 
 impl Color {
     pub fn new(r: f32, g: f32, b: f32) -> Self {
@@ -30,5 +30,11 @@ impl Display for Color {
                (255.0 * self.g()) as i32,
                (255.0 * self.b()) as i32,
         )
+    }
+}
+
+impl From<Vec3> for Color {
+    fn from(v: Vec3) -> Self {
+        Color(v)
     }
 }

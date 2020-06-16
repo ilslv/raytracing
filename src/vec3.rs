@@ -1,6 +1,7 @@
 use std::ops::{Neg, Index, IndexMut, AddAssign, MulAssign, DivAssign, Mul, Add, SubAssign, Sub, Div};
 use std::slice::{Iter, IterMut};
 use crate::point3::Point3;
+use crate::color::Color;
 
 #[derive(Clone, Copy, Debug, Default)]
 pub(crate) struct Vec3 {
@@ -218,9 +219,15 @@ impl Div<f32> for Vec3 {
     }
 }
 
-impl Into<Point3> for Vec3 {
-    fn into(self) -> Point3 {
-        Point3(self)
+impl From<Point3> for Vec3 {
+    fn from(p: Point3) -> Self {
+        p.0
+    }
+}
+
+impl From<Color> for Vec3 {
+    fn from(c: Color) -> Self {
+        c.0
     }
 }
 
