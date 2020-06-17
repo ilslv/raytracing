@@ -3,6 +3,7 @@ use std::slice::{Iter, IterMut};
 use crate::point3::Point3;
 use crate::color::Color;
 use rand::Rng;
+use std::f32::consts::PI;
 
 #[derive(Clone, Copy, Debug, Default)]
 pub(crate) struct Vec3 {
@@ -84,6 +85,28 @@ impl Vec3 {
                 return p;
             }
         }
+    }
+
+    pub fn random_unit_vector() -> Vec3 {
+        let mut rng = rand::thread_rng();
+        let a = rng.gen_range(0.0, 2.0 * PI);
+        let z = rng.gen_range(-1.0, 1.0);
+        let r = f32::sqrt(1.0 - z * z);
+
+        Vec3 {
+            vec: [r * f32::cos(a), r * f32::sin(a), z],
+        }
+    }
+
+    pub fn reflect(&self, normal: &Vec3) -> Vec3 {
+        *self - 2.0 * Vec3::dot(self, normal) * *normal
+    }
+
+    pub fn refract(self, normal: Vec3, etai_over_etat: f32) -> Vec3 {
+        let cos_theta = Vec3::dot(&-self, &normal);
+        let r_out_parallel: Vec3 = etai_over_etat * (self + cos_theta * normal);
+        let r_out_perp = -(1.0 - r_out_parallel.length_squared()).sqrt() * normal;
+        r_out_parallel + r_out_perp
     }
 }
 

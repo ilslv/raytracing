@@ -6,6 +6,7 @@ mod hit;
 mod sphere;
 mod hittable_list;
 mod camera;
+mod material;
 
 use crate::color::Color;
 use crate::ray::Ray;
@@ -17,6 +18,7 @@ use std::rc::Rc;
 use crate::sphere::Sphere;
 use crate::camera::Camera;
 use rand::Rng;
+use crate::material::{Lambertian, Metal, Dielectric};
 
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
 const IMAGE_WIDTH: u32 = 384;
@@ -29,10 +31,12 @@ fn ray_color(ray: &Ray, world: &impl Hit, depth: i32) -> Color {
 
     match world.hit(ray, 0.001, f32::INFINITY) {
         Some(hit_rec) => {
-            let target = hit_rec.p + hit_rec.normal + Vec3::random_in_unit_sphere();
-            (0.5 * Vec3::from(
-                ray_color(&Ray::new(hit_rec.p, Vec3::from(target) - Vec3::from(hit_rec.p)), world, depth - 1)
-            )).into()
+            hit_rec.material
+                .scatter(ray, &hit_rec)
+                .map_or_else(
+                    || Color::new(0.0, 0.0, 0.0),
+                    |r| (Vec3::from(r.attenuation) * Vec3::from(ray_color(&r.scattered, world, depth - 1))).into(),
+                )
         }
         None => {
             let unit_direction = ray.direction.unit_vec();
@@ -53,8 +57,31 @@ fn main() {
     let cam = Camera::new();
 
     let mut world = HittableList::default();
-    world.add(Rc::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
-    world.add(Rc::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
+    world.add(Rc::new(Sphere::new(
+        Point3::new(0.0, 0.0, -1.0),
+        0.5,
+        Rc::new(Lambertian::new(Color::new(0.1, 0.2, 0.5))),
+    )));
+    world.add(Rc::new(Sphere::new(
+        Point3::new(0.0, -100.5, -1.0),
+        100.0,
+        Rc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0))),
+    )));
+    world.add(Rc::new(Sphere::new(
+        Point3::new(1.0, 0.0, -1.0),
+        0.5,
+        Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 1.0)),
+    )));
+    world.add(Rc::new(Sphere::new(
+        Point3::new(-1.0, 0.0, -1.0),
+        0.5,
+        Rc::new(Dielectric::new(1.5)),
+    )));
+    world.add(Rc::new(Sphere::new(
+        Point3::new(-1.0, 0.0, -1.0),
+        -0.45,
+        Rc::new(Dielectric::new(1.5)),
+    )));
 
     for j in (0..IMAGE_HEIGHT).rev() {
         eprintln!("Lines remained {}", j);
