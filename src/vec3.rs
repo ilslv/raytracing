@@ -2,6 +2,7 @@ use std::ops::{Neg, Index, IndexMut, AddAssign, MulAssign, DivAssign, Mul, Add, 
 use std::slice::{Iter, IterMut};
 use crate::point3::Point3;
 use crate::color::Color;
+use rand::Rng;
 
 #[derive(Clone, Copy, Debug, Default)]
 pub(crate) struct Vec3 {
@@ -60,6 +61,29 @@ impl Vec3 {
 
     pub fn unit_vec(self) -> Vec3 {
         self / self.length()
+    }
+
+    pub fn random() -> Vec3 {
+        let mut rng = rand::thread_rng();
+        Vec3 {
+            vec: rng.gen(),
+        }
+    }
+
+    pub fn random_range(min: f32, max: f32) -> Vec3 {
+        let mut rng = rand::thread_rng();
+        Vec3 {
+            vec: [rng.gen_range(min, max), rng.gen_range(min, max), rng.gen_range(min, max)],
+        }
+    }
+
+    pub fn random_in_unit_sphere() -> Vec3 {
+        loop {
+            let p = Vec3::random_range(-1.0, 1.0);
+            if p.length_squared() < 1.0 {
+                return p;
+            }
+        }
     }
 }
 

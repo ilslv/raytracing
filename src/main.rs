@@ -22,10 +22,17 @@ const ASPECT_RATIO: f32 = 16.0 / 9.0;
 const IMAGE_WIDTH: u32 = 384;
 const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f32 / ASPECT_RATIO) as u32;
 
-fn ray_color(ray: &Ray, world: &impl Hit) -> Color {
-    match world.hit(ray, 0.0, f32::INFINITY) {
+fn ray_color(ray: &Ray, world: &impl Hit, depth: i32) -> Color {
+    if depth <= 0 {
+        return Color::new(0.0, 0.0, 0.0);
+    }
+
+    match world.hit(ray, 0.001, f32::INFINITY) {
         Some(hit_rec) => {
-            (0.5 * (hit_rec.normal + Vec3::new(1.0, 1.0, 1.0))).into()
+            let target = hit_rec.p + hit_rec.normal + Vec3::random_in_unit_sphere();
+            (0.5 * Vec3::from(
+                ray_color(&Ray::new(hit_rec.p, Vec3::from(target) - Vec3::from(hit_rec.p)), world, depth - 1)
+            )).into()
         }
         None => {
             let unit_direction = ray.direction.unit_vec();
@@ -39,6 +46,7 @@ fn main() {
     print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
 
     let samples_per_pixel = 100;
+    let max_depth = 50;
 
     let mut rng = rand::thread_rng();
 
@@ -56,10 +64,14 @@ fn main() {
                 let u = (i as f32 + rng.gen::<f32>()) / (IMAGE_WIDTH - 1) as f32;
                 let v = (j as f32 + rng.gen::<f32>()) / (IMAGE_HEIGHT - 1) as f32;
                 let ray = cam.get_ray(u, v);
-                pixel_color += Vec3::from(ray_color(&ray, &world)) / samples_per_pixel as f32;
+                pixel_color += Vec3::from(ray_color(&ray, &world, max_depth)) / samples_per_pixel as f32;
             }
 
-            print!("{}\n", Color::from(pixel_color));
+            print!("{}\n", Color::new(
+                pixel_color.x().sqrt(),
+                pixel_color.y().sqrt(),
+                pixel_color.z().sqrt(),
+            ));
         }
     }
     eprintln!("Done!");
