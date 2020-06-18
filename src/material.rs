@@ -2,7 +2,6 @@ use crate::color::Color;
 use crate::ray::Ray;
 use crate::hit::HitRecord;
 use crate::vec3::Vec3;
-use std::rc::Rc;
 use rand::Rng;
 
 pub(crate) struct AttenuatedRay {

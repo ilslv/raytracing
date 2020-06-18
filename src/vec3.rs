@@ -7,7 +7,7 @@ use std::f32::consts::PI;
 
 #[derive(Clone, Copy, Debug, Default)]
 pub(crate) struct Vec3 {
-    vec: [f32; 3],
+    pub(crate) vec: [f32; 3],
 }
 
 impl Vec3 {

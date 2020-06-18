@@ -13,17 +13,17 @@ use crate::color::Color;
 use crate::ray::Ray;
 use crate::vec3::Vec3;
 use crate::point3::Point3;
-use crate::hit::{Hit, HitRecord};
+use crate::hit::Hit;
 use crate::hittable_list::HittableList;
 use std::rc::Rc;
 use crate::sphere::Sphere;
 use crate::camera::Camera;
 use rand::Rng;
-use crate::material::{Lambertian, Metal, Dielectric};
+use crate::material::{Lambertian, Metal, Dielectric, Material};
 use crate::angle::Degrees;
 
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
-const IMAGE_WIDTH: u32 = 384;
+const IMAGE_WIDTH: u32 = 1280;
 const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f32 / ASPECT_RATIO) as u32;
 
 fn ray_color(ray: &Ray, world: &impl Hit, depth: i32) -> Color {
@@ -48,6 +48,65 @@ fn ray_color(ray: &Ray, world: &impl Hit, depth: i32) -> Color {
     }
 }
 
+fn scene() -> HittableList {
+    let mut rng = rand::thread_rng();
+    let mut world = HittableList::default();
+
+    let ground = Rc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
+    world.add(Rc::new(Sphere::new(
+        Point3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        ground,
+    )));
+
+    for a in -11..11 {
+        for b in -11..11 {
+            let center = Point3::new(a as f32 + 0.9 * rng.gen::<f32>(), 0.2, b as f32 + 0.9 * rng.gen::<f32>());
+
+            if (Vec3::from(center) - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
+                let sphere_material: Rc<dyn Material> = match rng.gen::<f32>() {
+                    x if (0.0..0.8).contains(&x) => {
+                        let albedo = Color::random();
+                        Rc::new(Lambertian::new(albedo))
+                    },
+                    x if (0.8..0.9).contains(&x) => {
+                        let albedo = Color::random_range(0.5, 1.0);
+                        let roughness = rng.gen_range(0.0, 0.5);
+                        Rc::new(Metal::new(albedo, roughness))
+                    },
+                    _ => {
+                        Rc::new(Dielectric::new(1.5))
+                    },
+                };
+
+                world.add(Rc::new(Sphere::new(
+                    center,
+                    0.2,
+                    sphere_material,
+                )));
+            }
+        }
+    }
+
+    world.add(Rc::new(Sphere::new(
+        Point3::new(-4.0, 1.0, 0.0),
+        1.0,
+        Rc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1))),
+    )));
+    world.add(Rc::new(Sphere::new(
+        Point3::new(4.0, 1.0, 0.0),
+        1.0,
+        Rc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0)),
+    )));
+    world.add(Rc::new(Sphere::new(
+        Point3::new(0.0, 1.0, 0.0),
+        1.0,
+        Rc::new(Dielectric::new(1.5)),
+    )));
+
+    world
+}
+
 fn main() {
     print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
 
@@ -56,11 +115,11 @@ fn main() {
 
     let mut rng = rand::thread_rng();
 
-    let origin = Point3::new(3.0, 3.0, 2.0);
-    let destination = Point3::new(0.0, 0.0, -1.0);
+    let origin = Point3::new(13.0, 2.0, 3.0);
+    let destination = Point3::new(0.0, 0.0, 0.0);
     let view_up = Vec3::new(0.0, 1.0, 0.0);
-    let dist_to_focus = (Vec3::from(origin) - Vec3::from(destination)).length();
-    let aperture = 2.0;
+    let dist_to_focus = 10.0;
+    let aperture = 0.1;
 
     let cam = Camera::new(
         origin,
@@ -72,38 +131,13 @@ fn main() {
         dist_to_focus,
     );
 
-    let mut world = HittableList::default();
-    world.add(Rc::new(Sphere::new(
-        Point3::new(0.0, 0.0, -1.0),
-        0.5,
-        Rc::new(Lambertian::new(Color::new(0.1, 0.2, 0.5))),
-    )));
-    world.add(Rc::new(Sphere::new(
-        Point3::new(0.0, -100.5, -1.0),
-        100.0,
-        Rc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0))),
-    )));
-    world.add(Rc::new(Sphere::new(
-        Point3::new(1.0, 0.0, -1.0),
-        0.5,
-        Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.1)),
-    )));
-    world.add(Rc::new(Sphere::new(
-        Point3::new(-1.0, 0.0, -1.0),
-        0.5,
-        Rc::new(Dielectric::new(1.5)),
-    )));
-    world.add(Rc::new(Sphere::new(
-        Point3::new(-1.0, 0.0, -1.0),
-        -0.45,
-        Rc::new(Dielectric::new(1.5)),
-    )));
+    let world = scene();
 
     for j in (0..IMAGE_HEIGHT).rev() {
         eprintln!("Lines remained {}", j);
         for i in 0..IMAGE_WIDTH {
             let mut pixel_color = Vec3::new(0.0, 0.0, 0.0);
-            for s in 0..samples_per_pixel {
+            for _ in 0..samples_per_pixel {
                 let u = (i as f32 + rng.gen::<f32>()) / (IMAGE_WIDTH - 1) as f32;
                 let v = (j as f32 + rng.gen::<f32>()) / (IMAGE_HEIGHT - 1) as f32;
                 let ray = cam.get_ray(u, v);
