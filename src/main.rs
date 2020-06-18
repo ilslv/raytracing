@@ -1,3 +1,4 @@
+mod angle;
 mod vec3;
 mod color;
 mod point3;
@@ -19,6 +20,7 @@ use crate::sphere::Sphere;
 use crate::camera::Camera;
 use rand::Rng;
 use crate::material::{Lambertian, Metal, Dielectric};
+use crate::angle::Degrees;
 
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
 const IMAGE_WIDTH: u32 = 384;
@@ -54,7 +56,21 @@ fn main() {
 
     let mut rng = rand::thread_rng();
 
-    let cam = Camera::new();
+    let origin = Point3::new(3.0, 3.0, 2.0);
+    let destination = Point3::new(0.0, 0.0, -1.0);
+    let view_up = Vec3::new(0.0, 1.0, 0.0);
+    let dist_to_focus = (Vec3::from(origin) - Vec3::from(destination)).length();
+    let aperture = 2.0;
+
+    let cam = Camera::new(
+        origin,
+        destination,
+        view_up,
+        Degrees(20.0),
+        ASPECT_RATIO,
+        aperture,
+        dist_to_focus,
+    );
 
     let mut world = HittableList::default();
     world.add(Rc::new(Sphere::new(
@@ -70,7 +86,7 @@ fn main() {
     world.add(Rc::new(Sphere::new(
         Point3::new(1.0, 0.0, -1.0),
         0.5,
-        Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 1.0)),
+        Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.1)),
     )));
     world.add(Rc::new(Sphere::new(
         Point3::new(-1.0, 0.0, -1.0),

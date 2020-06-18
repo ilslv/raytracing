@@ -6,9 +6,9 @@ use std::rc::Rc;
 use crate::material::Material;
 
 pub(crate) struct Sphere {
-    pub center: Point3,
-    pub radius: f32,
-    pub material: Rc<dyn Material>
+    center: Point3,
+    radius: f32,
+    material: Rc<dyn Material>
 }
 
 impl Sphere {
