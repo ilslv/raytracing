@@ -1,3 +1,4 @@
+mod progress_bar;
 mod angle;
 mod vec3;
 mod color;
@@ -21,12 +22,15 @@ use crate::camera::Camera;
 use rand::Rng;
 use crate::material::{Lambertian, Metal, Dielectric, Material};
 use crate::angle::Degrees;
+use crate::progress_bar::ProgressBar;
 
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
-const IMAGE_WIDTH: u32 = 1280;
+const IMAGE_WIDTH: u32 = 1600;
 const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f32 / ASPECT_RATIO) as u32;
+const SAMPLES_PER_PIXEL: u32 = 100;
+const MAX_DEPTH: u32 = 50;
 
-fn ray_color(ray: &Ray, world: &impl Hit, depth: i32) -> Color {
+fn ray_color(ray: &Ray, world: &impl Hit, depth: u32) -> Color {
     if depth <= 0 {
         return Color::new(0.0, 0.0, 0.0);
     }
@@ -110,9 +114,6 @@ fn scene() -> HittableList {
 fn main() {
     print!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
 
-    let samples_per_pixel = 100;
-    let max_depth = 50;
-
     let mut rng = rand::thread_rng();
 
     let origin = Point3::new(13.0, 2.0, 3.0);
@@ -132,16 +133,17 @@ fn main() {
     );
 
     let world = scene();
+    let progress_bar = ProgressBar::new(50);
 
     for j in (0..IMAGE_HEIGHT).rev() {
-        eprintln!("Lines remained {}", j);
+        progress_bar.update(1.0 - j as f32 / IMAGE_HEIGHT as f32);
         for i in 0..IMAGE_WIDTH {
             let mut pixel_color = Vec3::new(0.0, 0.0, 0.0);
-            for _ in 0..samples_per_pixel {
+            for _ in 0..SAMPLES_PER_PIXEL {
                 let u = (i as f32 + rng.gen::<f32>()) / (IMAGE_WIDTH - 1) as f32;
                 let v = (j as f32 + rng.gen::<f32>()) / (IMAGE_HEIGHT - 1) as f32;
                 let ray = cam.get_ray(u, v);
-                pixel_color += Vec3::from(ray_color(&ray, &world, max_depth)) / samples_per_pixel as f32;
+                pixel_color += Vec3::from(ray_color(&ray, &world, MAX_DEPTH)) / SAMPLES_PER_PIXEL as f32;
             }
 
             print!("{}\n", Color::new(
@@ -151,5 +153,5 @@ fn main() {
             ));
         }
     }
-    eprintln!("Done!");
+    eprint!("\nDone!");
 }
